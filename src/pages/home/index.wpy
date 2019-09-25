@@ -1,0 +1,490 @@
+<template>
+  <view class="page" catchtouchmove='stopPageScroll'>
+    <scroll-view scroll-y="true" class="history" style="height:{{scrollHeight}}rpx" scroll-into-view="{{scrolltoItem}}" scroll-with-animation @tap='outbtn' @touchstart="outbtn">
+      <div wx:for="{{newslist}}" wx:for-index="index" wx:key="index" id="item{{index}}" class="item">
+        <!--自己的消息  -->
+        <view class="mine-news" wx:if="{{item.from_user==1}}">
+          <view class="show-date" wx:if="{{item.time}}">{{item.time}}</view>
+          <view class='news-content'>
+            <image class="status_icon" wx:if="{{item.status==1}}" src="../img/Testing_icon_Success@2x.png"></image>
+            <image class="status_icon" wx:if="{{item.status==2}}" src="../img/loading_icon.gif"></image>
+            <image class="status_icon" wx:if="{{item.status==3}}" src="../img/windows_icon_fail@2x.png"></image>
+            <view class='news_text' wx:if="{{item.content_type==1}}">{{item.content}}</view>
+            <image class="news_img" wx:if="{{item.content_type==2}}" src="{{item.content}}" mode="aspectFill" data-src="{{item.content}}" lazy-load="true" bindtap="previewImg"></image>
+            <image class='avatar' src="{{item.avatarUrl}}"></image>
+          </view>
+        </view>
+        <!-- 别人的消息  -->
+        <view class="other-news" wx:else>
+          <view class="show-date" wx:if="{{item.time}}">{{item.time}}</view>
+          <view class='news-content'>
+            <image class='avatar' src="{{item.avatarUrl}}"></image>
+            <view class='news_text' wx:if="{{item.content_type==1}}">{{item.content}}</view>
+            <image class="news_img" mode="aspectFill" wx:if="{{item.content_type==2}}" src="{{item.content}}" data-src="{{item.content}}" lazy-load="true" bindtap="previewImg"></image>
+          </view>
+        </view>
+      </div>
+    </scroll-view>
+    <!-- 聊天输入 -->
+    <view class="message" catchtouchmove='stopPageScroll'>
+      <view bindreset="cleanInput" class="sendMessage" catchtouchmove='stopPageScroll'>
+        <input type="text" catchtouchmove='stopPageScroll' focus='{{inputFocus}}' bindblur="onBlur" confirm-hold="true" cursor-spacing='30rpx' value="{{message}}" bindinput='bindChange' bindfocus="onFocus" bindconfirm='send'></input>
+        <image class="add" src="../img/talk_icon_keyboard@3x.png" bindtap='increase1'></image>
+        <image class="add" src="../img/talk_icon_add@3x.png" bindtap='increase2'></image>
+      </view>
+      <view class="expressions" wx:if="{{showIncrease1}}" catchtouchmove='stopPageScroll'>
+        <scroll-view scroll-y="true" style="max-height:352rpx">
+          <view class="desc" wx:for="{{expressions}}" @tap="chooseExpressions" wx:for-index="index" data-index="{{index}}" wx:key="key">{{item}}</view>
+        </scroll-view>
+      </view>
+      <view class="increased" wx:if="{{showIncrease2}}" catchtouchmove='stopPageScroll'>
+        <image src="../img/photo_icon.png" class="image" bindtap='chooseImage'></image>
+      </view>
+    </view>
+  </view>
+</template>
+
+<script>
+  import wepy from 'wepy';
+  export default class Index extends wepy.page {
+    data = {
+      inputFocus: false,
+      windowHeightTorpx: 0,
+      scrollHeight: 0,
+      expressions: [
+        '感谢您租用我们车辆，欢迎下次再来哦',
+        '感谢您租用我们车辆，欢迎下次再来哦',
+        '感谢您租用我们车辆，欢迎下次再来哦',
+        '感谢您租用我们车辆，欢迎下次再来哦'
+      ],
+      newslist: [{
+          content: '我是长沙张学友哦',
+          content_type: 1,
+          session_type: 1,
+          from_user: 1,
+          status: 1,
+          time: '7月21日 22:32',
+          avatarUrl: '../img/Center_icon_user@2x.png'
+        },
+        {
+          content: '我是南昌王力宏我是南昌王力宏我是南昌王力宏我是南昌王力宏',
+          content_type: 1,
+          session_type: 1,
+          from_user: 2,
+          status: 1,
+          time: '7月21日 22:32',
+          avatarUrl: '../img/Center_icon_user@2x.png'
+        },
+        {
+          content: 'https://t.resource.joyincar.cn/car_rental/driving_license_picture/20190806135450-7620.jpg',
+          content_type: 2,
+          session_type: 1,
+          from_user: 1,
+          status: 1,
+          time: '',
+          avatarUrl: '../img/Center_icon_user@2x.png'
+        },
+        {
+          content: '我是南昌王力宏',
+          content_type: 1,
+          session_type: 1,
+          from_user: 2,
+          status: 1,
+          time: '7月21日 22:32',
+          avatarUrl: '../img/Center_icon_user@2x.png'
+        },
+        {
+          content: '我是南昌王力宏',
+          content_type: 1,
+          session_type: 1,
+          from_user: 1,
+          status: 1,
+          time: '',
+          avatarUrl: '../img/Center_icon_user@2x.png'
+        },
+        {
+          content: '我是南昌王力宏',
+          content_type: 1,
+          session_type: 1,
+          from_user: 2,
+          status: 1,
+          time: '7月21日 22:32',
+          avatarUrl: '../img/Center_icon_user@2x.png'
+        },
+        {
+          content: 'https://t.resource.joyincar.cn/car_rental/driving_license_picture/20190806135450-7620.jpg',
+          content_type: 2,
+          session_type: 1,
+          from_user: 1,
+          status: 2,
+          time: '',
+          avatarUrl: '../img/Center_icon_user@2x.png'
+        },
+        {
+          content: '我是南昌王力宏',
+          content_type: 1,
+          session_type: 1,
+          from_user: 2,
+          status: 1,
+          time: '7月21日 22:32',
+          avatarUrl: '../img/Center_icon_user@2x.png'
+        }
+      ],
+      scrolltoItem: '',
+      showIncrease1: false, //图片添加区域隐藏
+      showIncrease2: false, //常用语添加区域隐藏
+      message: '',
+      previewImgList: []
+    };
+    mixins = [];
+    async startLoadingPage() {
+      var that = this;
+      //调通接口
+      this.$apply();
+    }
+    methods = {
+      //事件处理函数
+      send() {
+        var that = this;
+        if (this.message == '') {
+          wx.showToast({
+            title: '消息不能为空哦~',
+            icon: 'none',
+            duration: 2000
+          });
+        } else {
+          that.newslist.push({
+            content: that.message,
+            content_type: 1,
+            session_type: 1,
+            from_user: 1,
+            status: 1,
+            time: '7月21日 22:32',
+            avatarUrl: '../img/Center_icon_user@2x.png'
+          });
+          that.message = '';
+          that.scrollToBottom();
+        }
+      },
+      //监听input值的改变
+      bindChange(e) {
+        this.message = e.detail.value;
+      },
+      increase1() {
+        setTimeout(() => {
+          if (this.showIncrease1) {
+            this.inputFocus = !this.inputFocus;
+          } else {
+            this.showIncrease1 = true;
+            this.showIncrease2 = false;
+          }
+          this.changeScrollHeight();
+          this.$apply();
+        }, 300);
+      },
+      increase2() {
+        setTimeout(() => {
+          if (this.showIncrease2) {
+            this.inputFocus = !this.inputFocus;
+          } else {
+            this.showIncrease2 = true;
+            this.showIncrease1 = false;
+          }
+          this.changeScrollHeight();
+          this.$apply();
+        }, 300);
+      },
+      stopPageScroll() {
+        return;
+      },
+      //点击空白隐藏message下选框
+      outbtn() {
+        this.showIncrease1 = false;
+        this.showIncrease2 = false;
+        this.changeScrollHeight();
+        this.$apply();
+      },
+      chooseImage() {
+        var that = this;
+        wx.chooseImage({
+          count: 1, // 默认9
+          sizeType: ['original', 'compressed'], // 可以指定是原图还是压缩图，默认二者都有
+          sourceType: ['album', 'camera'], // 可以指定来源是相册还是相机，默认二者都有
+          success: function(res) {
+            // 返回选定照片的本地文件路径列表，tempFilePath可以作为img标签的src属性显示图片
+            var tempFilePaths = res.tempFilePaths[0];
+            // console.log(tempFilePaths)
+            that.newslist.push({
+              content: tempFilePaths,
+              content_type: 2,
+              session_type: 1,
+              from_user: 1,
+              status: 1,
+              time: '7月21日 22:32',
+              avatarUrl: '../img/Center_icon_user@2x.png'
+            });
+            that.scrollToBottom();
+            that.$apply();
+          }
+        });
+      },
+      //图片预览
+      previewImg(e) {
+        let that = this;
+        //必须给对应的wxml的image标签设置data-set=“图片路径”，否则接收不到
+        let res = e.target.dataset.src;
+        let list = [res];
+        console.log(res);
+        // list.push(res)
+        //判断res在数组中是否存在，不存在则push到数组中, -1表示res不存在
+        // console.log(res, that.previewImgList);
+        wx.previewImage({
+          current: res, // 当前显示图片的http链接
+          urls: list // 需要预览的图片http链接列表
+        });
+      },
+      chooseExpressions(e) {
+        let index = e.target.dataset.index;
+        this.newslist.push({
+          content: this.expressions[index],
+          content_type: 1,
+          session_type: 1,
+          from_user: 1,
+          status: 2,
+          time: '7月21日 22:32',
+          avatarUrl: '../img/Center_icon_user@2x.png'
+        });
+        this.scrollToBottom();
+        this.$apply();
+      }
+    };
+    //聊天消息始终显示最底端
+    onFocus() {
+      // this.changeScrollHeight();
+      this.scrollToBottom();
+    }
+    onBlur() {
+      // this.showIncrease2=false;
+      // this.showIncrease1 = false;
+      // this.$apply();
+    }
+    changeScrollHeight() {
+      if (this.showIncrease1 || this.showIncrease2) {
+        this.scrollHeight = this.windowHeightTorpx - 456;
+        this.$apply();
+        this.scrollToBottom();
+      } else {
+        this.scrollHeight = this.windowHeightTorpx - 104;
+        this.$apply();
+      }
+    }
+    components = {};
+    config = {
+      navigationBarTitleText: '测试页面'
+    };
+    onLoad() {
+      this.startLoadingPage();
+      setTimeout(() => {
+        let len = this.newslist.length - 1;
+        this.scrolltoItem = `item${len}`;
+        this.$apply();
+      }, 100);
+    }
+    // scroll-view 滚动到底部
+    scrollToBottom() {
+      let len = this.newslist.length - 1;
+      if (len > 2) {
+        // 切换出相册的时候 必须改变scrolltoItem的值 不然滚动条根据变短了的scroll-view而进行重新调整
+        this.scrolltoItem = `item${len - 1}`;
+      }
+      setTimeout(() => {
+        this.scrolltoItem = `item${len}`;
+        this.$apply();
+      }, 500);
+    }
+    onReady() {
+      let windowHeight = wx.getSystemInfoSync().windowHeight;
+      let windowWidth = wx.getSystemInfoSync().windowWidth;
+      this.windowHeightTorpx = Math.ceil(windowHeight * (750 / windowWidth)); // 将视口的高度px转换为rpx
+      this.scrollHeight = this.windowHeightTorpx - 104; // 104 底部输入框的高度
+      this.$apply();
+    }
+  }
+</script>
+
+<style lang="less" scoped>
+  .page {
+    background-color: #f7f7f7;
+    height: 100%;
+  }
+  .mine-news,
+  .other-news {
+    width: 100%;
+    overflow: hidden;
+    text-align: center;
+    .show-date {
+      text-align: center;
+      color: #9ea3a7;
+      font-size: 24rpx;
+      line-height: 64rpx;
+    }
+    .news-content {
+      display: flex;
+      justify-content: flex-end;
+      align-items: flex-start;
+      .status_icon {
+        width: 40rpx;
+        height: 40rpx;
+        margin-top: 16rpx;
+        margin-right: 16rpx;
+      }
+      .news_text {
+        max-width: 476rpx;
+        font-size: 28rpx;
+        line-height: 40rpx;
+        padding: 16rpx 24rpx;
+        background: #4097fc;
+        position: relative;
+        border-radius: 8rpx;
+        color: #fff;
+        text-align: left;
+      }
+      .news_img {
+        max-width: 264rpx;
+        max-height: 264rpx;
+        margin-right: 8rpx;
+      }
+      .avatar {
+        width: 72rpx;
+        height: 72rpx;
+        border-radius: 50%;
+      }
+    }
+  }
+  .mine-news {
+    .news-content {
+      .news_text {
+        margin-right: 16rpx;
+        border: 2rpx solid #4097fc !important;
+        &::after {
+          content: '';
+          position: absolute;
+          width: 12rpx;
+          height: 20rpx;
+          background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABIAAAAeCAYAAAAhDE4sAAAAAXNSR0IArs4c6QAAATdJREFUSA2t1V1Kw0AQB/D5b6OXEKy9ghewht7AC4gUpVfwyVsERUrx3XcfSu0JvIKt4C3SHXdsAhObdj/MQNiZJfNjZ/MQ5MXmgao4JjN7m2BV1zErhkXJdQMIaxyZi8UY63ovdDX6RSbu29Iu82fu6/2QvAH9NjCfpWC7kGgJWDuUgO2HFDZ65FMpD8VhSDrdmCXbpQ/zQ1ts4MPCoAAsHFJYXvCJlDriIOlkHljazDQieTy0FUaXT+WNxlIhIktXnUDMOO8E0ojkyaMB/KGxZMgd4bULaP5+m03/BwGfhnrXGpE8bjSHZDDDxQTf6VCFzO/w9RcJP5EHCYMCED8ErORO9o2jR8x00cgdYjKHjNvvpPGuK9q/WoXE/Ch3oQRETteEEhGBMgD3zGRg3NMzLzHjCFDHD5dShGlfzAr6AAAAAElFTkSuQmCC');
+          background-size: 100%;
+          top: 26rpx;
+          right: -11rpx;
+          overflow: hidden;
+        }
+      }
+    }
+  }
+  .other-news {
+    .news-content {
+      justify-content: flex-start;
+      .news_text {
+        margin-left: 16rpx;
+        background: #fff;
+        border: 2rpx solid #ddd;
+        color: #252f3a;
+        &::before {
+          content: '';
+          position: absolute;
+          width: 12rpx;
+          height: 20rpx;
+          background: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABIAAAAeCAYAAAAhDE4sAAAAAXNSR0IArs4c6QAAAWBJREFUSA2d1EFOhTAQBuCWhAULFqwgMegz3MATuPAGXsB4Mi/gCVzoCbwB8CIxgRULFixIwPnRMUBfS8ss3hRe+2U6BaQ4GGVZnsZxLHm5xwOXXBTFzTRN77zG8zwh+cI2A6G5HwSdsAZIHMdukA4JgsAeMiFzZfjZizzPr2mOsh1UwrHbbCBSSiMCzAgtkFtMJnBu7LIS3EdoT+0SkiSJuIRoIVcEkLK1qqqu/nryvx1TJUAQCjQMwws9bE6IAtGWngl5wB9orE0lmIvYVvT4e1uIKIq0jeU5y7yCqIo7/jMMQx5a5RVktUIzaQVRfz55Xtd1PLTKK4hWvPKqtm1F3/d8uZuVJ5ve8rcjJ7etSPi+/0RNnz+hBIq6rq0qU6A0Tb8JuHfFlK1xM1zfNy0E0AUzQi6Y0iPeGucsy762PWuaRjmA3YoY3Pv4W0MATZgTZMKcIR12CGKMDuGMMeIHZRjLnl9OFmEAAAAASUVORK5CYII=');
+          background-size: 100%; // left: -12rpx;
+          top: 26rpx;
+          left: -11rpx;
+          overflow: hidden;
+        }
+      }
+      .news_img {
+        margin: 0;
+        margin-left: 8rpx;
+      }
+    }
+  }
+  .history {
+    height: 100%;
+    font-size: 14px;
+    line-height: 40px;
+    word-break: break-all;
+    background: #f6f8fa;
+    .item {
+      display: flex;
+      align-items: center;
+      padding: 0 28rpx;
+      padding-bottom: 24rpx;
+    }
+    .item:last-child {
+      padding-bottom: 36rpx;
+    }
+  }
+   ::-webkit-scrollbar {
+    width: 0;
+    height: 0;
+    color: transparent;
+    z-index: -1;
+  }
+  /* 信息输入区域 */
+  .message {
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    background-color: #eff1f3;
+  }
+  .sendMessage {
+    display: flex;
+    box-sizing: border-box;
+    height: 104rpx;
+    width: 100%;
+    padding: 0 24rpx;
+    align-items: center;
+  }
+  .sendMessage input {
+    box-sizing: border-box;
+    flex: 1;
+    height: 72rpx;
+    outline: none;
+    border: none;
+    padding: 16rpx 10rpx; // padding-top: 8rpx;
+    background-color: #fff;
+    font-size: 28rpx;
+    color: #252f3a;
+    line-height: 40rpx;
+  }
+  .sendMessage .add {
+    width: 60rpx;
+    height: 60rpx;
+    margin-left: 24rpx;
+  }
+  .increased {
+    width: 100%;
+    height: 352rpx;
+    padding-top: 32rpx;
+    padding-left: 48rpx;
+    background-color: #eff1f3;
+    box-sizing: border-box;
+    overflow: hidden;
+  }
+  .expressions {
+    background: #f6f8fa;
+    text-align: center;
+    overflow: hidden;
+    .desc {
+      padding: 22rpx 70rpx;
+      border-bottom: 2rpx solid #ddd;
+      line-height: 44rpx;
+      font-size: 32rpx;
+      color: #252f3a;
+    }
+  }
+  .increased .image {
+    width: 120rpx;
+    height: 120rpx;
+    background-size: 100%;
+    overflow: hidden;
+  }
+</style>

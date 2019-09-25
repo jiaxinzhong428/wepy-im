@@ -1,5 +1,5 @@
 <template>
-  <view class="page" catchtouchmove='stopPageScroll'>
+  <view class="page">
     <scroll-view scroll-y="true" class="history" style="height:{{scrollHeight}}rpx" scroll-into-view="{{scrolltoItem}}" scroll-with-animation @tap='outbtn' @touchstart="outbtn">
       <div wx:for="{{newslist}}" wx:for-index="index" wx:key="index" id="item{{index}}" class="item">
         <!--自己的消息  -->
@@ -27,8 +27,8 @@
     </scroll-view>
     <!-- 聊天输入 -->
     <view class="message" catchtouchmove='stopPageScroll'>
-      <view bindreset="cleanInput" class="sendMessage" catchtouchmove='stopPageScroll'>
-        <input type="text" catchtouchmove='stopPageScroll' focus='{{inputFocus}}' bindblur="onBlur" confirm-hold="true" cursor-spacing='30rpx' value="{{message}}" bindinput='bindChange' bindfocus="onFocus" bindconfirm='send'></input>
+      <view bindreset="cleanInput" class="sendMessage">
+        <input type="text" focus='{{inputFocus}}'  confirm-hold="true" cursor-spacing='30rpx' value="{{message}}" bindinput='bindChange' bindfocus="onFocus" bindconfirm='send'></input>
         <image class="add" src="../img/talk_icon_keyboard@3x.png" bindtap='increase1'></image>
         <image class="add" src="../img/talk_icon_add@3x.png" bindtap='increase2'></image>
       </view>
@@ -37,7 +37,7 @@
           <view class="desc" wx:for="{{expressions}}" @tap="chooseExpressions" wx:for-index="index" data-index="{{index}}" wx:key="key">{{item}}</view>
         </scroll-view>
       </view>
-      <view class="increased" wx:if="{{showIncrease2}}" catchtouchmove='stopPageScroll'>
+      <view class="increased" wx:if="{{showIncrease2}}">
         <image src="../img/photo_icon.png" class="image" bindtap='chooseImage'></image>
       </view>
     </view>
@@ -52,10 +52,10 @@
       windowHeightTorpx: 0,
       scrollHeight: 0,
       expressions: [
-        '感谢您租用我们车辆，欢迎下次再来哦',
-        '感谢您租用我们车辆，欢迎下次再来哦',
-        '感谢您租用我们车辆，欢迎下次再来哦',
-        '感谢您租用我们车辆，欢迎下次再来哦'
+        '我非常帅，我还很温柔很善良，又能怎么样',
+        '深圳的钱深圳花，一分别想寄回家',
+        '我是电竞大神,我是荣耀王者,我是吃鸡大佬',
+        '上面都是我瞎编的，其实我是一个穷屌丝'
       ],
       newslist: [{
           content: '我是长沙张学友哦',
@@ -262,11 +262,6 @@
     onFocus() {
       // this.changeScrollHeight();
       this.scrollToBottom();
-    }
-    onBlur() {
-      // this.showIncrease2=false;
-      // this.showIncrease1 = false;
-      // this.$apply();
     }
     changeScrollHeight() {
       if (this.showIncrease1 || this.showIncrease2) {

@@ -28,7 +28,7 @@
     <!-- 聊天输入 -->
     <view class="message" catchtouchmove='stopPageScroll'>
       <view bindreset="cleanInput" class="sendMessage">
-        <input type="text" focus='{{inputFocus}}'  confirm-hold="true" cursor-spacing='30rpx' value="{{message}}" bindinput='bindChange' bindfocus="onFocus" bindconfirm='send'></input>
+        <input type="text" focus='{{inputFocus}}' confirm-hold="true" cursor-spacing='30rpx' value="{{message}}" bindinput='bindChange' bindfocus="onFocus" bindconfirm='send'></input>
         <image class="add" src="../img/talk_icon_keyboard@3x.png" bindtap='increase1'></image>
         <image class="add" src="../img/talk_icon_add@3x.png" bindtap='increase2'></image>
       </view>

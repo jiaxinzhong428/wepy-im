@@ -1,6 +1,6 @@
 <template>
   <view class="page">
-    <scroll-view scroll-y="true" class="history" style="height:{{scrollHeight}}rpx" scroll-into-view="{{scrolltoItem}}" scroll-with-animation @tap='outbtn' @touchstart="outbtn">
+    <scroll-view scroll-y="true" class="history" style="height:{{scrollHeight}}rpx" scroll-into-view="{{scrolltoItem}}" scroll-with-animation @tap='outbtn' @touchstart="outbtn" bindscroll="getScrollInfo">
       <div wx:for="{{newslist}}" wx:for-index="index" wx:key="index" id="item{{index}}" class="item">
         <!--自己的消息  -->
         <view class="mine-news" wx:if="{{item.from_user==1}}">
@@ -28,7 +28,7 @@
     <!-- 聊天输入 -->
     <view class="message" catchtouchmove='stopPageScroll' style="bottom:{{inputBottom}}rpx">
       <view bindreset="cleanInput" class="sendMessage">
-        <input type="text" focus='{{inputFocus}}' adjust-position="{{false}}" confirm-hold="true" bindblur="onBlur" cursor-spacing='30rpx' value="{{message}}" bindinput='bindChange' bindfocus="onFocus" bindconfirm='send'></input>
+        <input type="text" focus='{{inputFocus}}' adjust-position="{{off_adjust_position}}" confirm-hold="true" bindblur="onBlur" cursor-spacing='30rpx' value="{{message}}" bindinput='bindChange' bindfocus="onFocus" bindconfirm='send'></input>
         <image class="add" src="../img/talk_icon_keyboard@3x.png" bindtap='increase1'></image>
         <image class="add" src="../img/talk_icon_add@3x.png" bindtap='increase2'></image>
       </view>
@@ -48,6 +48,7 @@
   import wepy from 'wepy';
   export default class Index extends wepy.page {
     data = {
+      need_AutoScrollToBottom: true,
       windowWidth: '',
       inputFocus: false,
       windowHeightTorpx: 0,
@@ -113,8 +114,8 @@
           avatarUrl: '../img/Center_icon_user@2x.png'
         },
         {
-          content: 'https://t.resource.joyincar.cn/car_rental/driving_license_picture/20190806135450-7620.jpg',
-          content_type: 2,
+          content: '我是南昌王力宏',
+          content_type: 1,
           session_type: 1,
           from_user: 1,
           status: 2,
@@ -180,7 +181,7 @@
             this.showIncrease1 = true;
             this.showIncrease2 = false;
           }
-          this.changeScrollHeight();
+          this.changeScrollHeightAndScrollToBottom();
           this.$apply();
         }, 300);
       },
@@ -192,7 +193,7 @@
             this.showIncrease2 = true;
             this.showIncrease1 = false;
           }
-          this.changeScrollHeight();
+          this.changeScrollHeightAndScrollToBottom();
           this.$apply();
         }, 300);
       },
@@ -201,10 +202,12 @@
       },
       //点击空白隐藏message下选框
       outbtn() {
-        this.showIncrease1 = false;
-        this.showIncrease2 = false;
-        this.changeScrollHeight();
-        this.$apply();
+        if (this.showIncrease2 || this.showIncrease1) {
+          this.showIncrease2 = false;
+          this.showIncrease1 = false;
+          this.$apply();
+          this.changeScrollHeightAndScrollToBottom()
+        }
       },
       chooseImage() {
         var that = this;
@@ -259,17 +262,46 @@
         this.scrollToBottom();
         this.$apply();
       },
-      //聊天消息始终显示最底端
-      onFocus(e) {
-        let inputHeight = 0
-        if (e.detail.height) {
-          // inputHeight = e.detail.height;
-          inputHeight = Math.ceil(e.detail.height * (750 / this.windowWidth));
-          // console.log(e.detail.height, inputHeight);
+      /**
+       * 监听scroll-view的滚动事件 当用户滚动容器查看历史消息的时候 如果滚动距离超过了scroll-view容器高度的一半后，如果有新消息推送过来不会辅助滚动到底部
+       * 如果滚动距离没有超过容器的一半高度，那么接收到消息会辅助滚动到底部 方便用户预览新消息。。
+       */
+      getScrollInfo(e) {
+        let {
+          scrollTop,
+          scrollHeight
+        } = e.detail;
+        let temp = scrollHeight - scrollTop;
+        let Height = Math.ceil(this.scrollHeight / 750 * this.windowWidth); //  将rpx转为px用于下面的计算
+        if (Math.abs(temp - Height) > Height / 2) {
+          this.need_AutoScrollToBottom = false;
+        } else {
+          this.need_AutoScrollToBottom = true;
         }
-        this.inputBottom = inputHeight;
-        this.scrollHeight = this.windowHeightTorpx - inputHeight - 104;
         this.$apply();
+      },
+      /**
+       * off_adjust_position 说明一下这个变量 由于微信小程序在弹起键盘的时候 默认会上推页面 根据目前聊天的页面布局
+       * 如果消息只有两三条的时候  弹起键盘 上推页面 那么那两三条消息就推到屏幕外去了。
+       * 为了优化体验 微信也提供了adjust-position来设置 弹起键盘 不上推页面，这个时候需要动态的定位输入框的位置 将输入框定位到键盘高度的上方，同时还需要动态改变
+       * scroll-view的默认高度 因为弹起键盘后 高度就变小了。。。。所以是 手机屏幕的高度 - 输入框的高度 - 键盘的高度
+       */
+      onFocus(e) {
+        if (!this.off_adjust_position) {
+          let inputHeight = 0
+          this.showIncrease1 = false;
+          this.showIncrease2 = false;
+          if (e.detail.height) {
+            inputHeight = Math.ceil(e.detail.height * (750 / this.windowWidth));
+            this.inputBottom = inputHeight;
+            this.scrollHeight = this.windowHeightTorpx - inputHeight - 104;
+          }
+          this.$apply();
+        } else {
+          this.inputBottom = 0;
+          this.changeScrollHeightAndScrollToBottom();
+          return;
+        }
         this.scrollToBottom();
       },
       onBlur() {
@@ -278,15 +310,29 @@
         this.$apply();
       }
     };
-    changeScrollHeight() {
-      if (this.showIncrease1 || this.showIncrease2) {
+    computed = {
+      /**
+       * 如果消息条数够多的时候 其实我们更希望弹起键盘的时候 上推页面 这样体验更好。。
+       * 但是又比较难计算时候 关闭和开启上推页面的功能 所以默认设置消息数为10的时候 就设置弹起键盘上推页面  少于10 弹起键盘 不上推页面
+       */
+      off_adjust_position() {
+        let length = this.newslist.length;
+        if (length > 10) return true;
+        else return false;
+      }
+    }
+    /**
+     *  这个方法就是当我们设置的常用语和发送图片的时候 会弹起一个常用语框和图片框 需要动态改变scroll-view的高度
+     */
+    changeScrollHeightAndScrollToBottom() {
+      if (this.showIncrease2 || this.showIncrease1) {
         this.scrollHeight = this.windowHeightTorpx - 456;
         this.$apply();
-        this.scrollToBottom();
       } else {
         this.scrollHeight = this.windowHeightTorpx - 104;
         this.$apply();
       }
+      this.scrollToBottom();
     }
     components = {};
     config = {
@@ -294,6 +340,7 @@
     };
     onLoad() {
       this.startLoadingPage();
+      this.off_adjust_position = false;
       setTimeout(() => {
         let len = this.newslist.length - 1;
         this.scrolltoItem = `item${len}`;
